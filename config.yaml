@@ -1,0 +1,55 @@
+wt_pdb: wt.pdb
+outdir: results
+xml: point_mut_4mer.xml
+rosetta_bin: /software/rosetta/3.15/main/source/bin/rosetta_scripts.default.linuxgccrelease
+ld_path: /software/rosetta/3.15/main/source/build/src/release/linux/6.1/64/x86/gcc/12/default
+ddg_csv: all_scores.csv
+rmsd_csv: rmsd.csv
+
+positions:
+  - 68
+  - 79
+  - 81
+  - 194
+  - 254
+  - 256
+  - 470
+  - 471
+  - 516
+  - 517
+  - 641
+
+aas:
+  - ALA
+  - ARG
+  - ASN
+  - ASP
+  - CYS
+  - GLU
+  - GLN
+  - GLY
+  - HIS
+  - ILE
+  - LEU
+  - LYS
+  - MET
+  - PHE
+  - PRO
+  - SER
+  - THR
+  - TRP
+  - TYR
+  - VAL
+
+wt_aas:
+  68: ARG
+  79: ALA
+  81: GLU
+  194: ALA
+  254: ARG
+  256: GLY
+  470: LYS
+  471: ARG
+  516: ASP
+  517: ARG
+  641: THR
