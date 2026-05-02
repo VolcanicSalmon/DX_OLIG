@@ -41,7 +41,6 @@ rule rosetta_mutscan:
             -nstruct 1
         """
 
-
 rule calc_ddg:
     input:
         expand(os.path.join(OUTDIR, f"{WTPREF}_{{pos}}_{{aa}}_score.sc"),
@@ -49,9 +48,10 @@ rule calc_ddg:
     output:
         os.path.join(OUTDIR, config["ddg_csv"])
     params:
-        score_dir = OUTDIR
+        score_dir = OUTDIR,
+        wt_aas    = WT_AAS_JSON
     shell:
-        "python3 calc_ddg.py {params.score_dir} {output}"
+        "python3 calc_ddg.py {params.score_dir} {output} '{params.wt_aas}'"
 
 
 rule calc_rmsd:
@@ -61,6 +61,7 @@ rule calc_rmsd:
     output:
         os.path.join(OUTDIR, config["rmsd_csv"])
     params:
-        score_dir = OUTDIR
+        score_dir = OUTDIR,
+        wt_aas    = str(config["wt_aas"]).replace("'", '"')
     shell:
-        "python3 calc_rmsd.py {params.score_dir} {output}"
+        "python3 calc_rmsd.py {params.score_dir} {output} '{params.wt_aas}'"
