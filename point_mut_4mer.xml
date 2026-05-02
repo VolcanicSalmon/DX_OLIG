@@ -1,0 +1,88 @@
+<ROSETTASCRIPTS>
+  <SCOREFXNS>
+    <ScoreFunction name="sfxn" weights="ref2015_cart"/>
+    <ScoreFunction name="sfxn_cc" weights="ref2015_cart">
+      <Reweight scoretype="coordinate_constraint" weight="1.0"/>
+    </ScoreFunction>
+  </SCOREFXNS>
+  <RESIDUE_SELECTORS>
+    <Index name="res_A" resnums="%%focused_res%%A"/>
+    <Index name="res_B" resnums="%%focused_res%%B"/>
+    <Index name="res_C" resnums="%%focused_res%%C"/>
+    <Index name="res_D" resnums="%%focused_res%%D"/>
+    <Or name="residue_position_to_explore" selectors="res_A,res_B,res_C,res_D"/>
+    <PrimarySequenceNeighborhood name="primary_seq_res" selector="residue_position_to_explore"/>
+    <Not name="not_primary_seq_res" selector="primary_seq_res"/>
+    <Neighborhood name="neighbors" selector="residue_position_to_explore"/>
+    <Not name="not_neighbor" selector="neighbors"/>
+    <And name="soft_sphere" selectors="neighbors,not_primary_seq_res"/>
+    <StoredResidueSubset name="neighbors_stored" subset_name="neighbors"/>
+    <StoredResidueSubset name="not_neighbor_stored" subset_name="not_neighbor"/>
+    <StoredResidueSubset name="soft_sphere_stored" subset_name="soft_sphere"/>
+  </RESIDUE_SELECTORS>
+
+  <JUMP_SELECTORS>
+    <Interchain name="interchain_jumps"/>
+  </JUMP_SELECTORS>
+
+  <MOVE_MAP_FACTORIES>
+    <MoveMapFactory name="inside_sphere" chi="false" bb="false">
+      <Chi residue_selector="neighbors_stored"/>
+      <Backbone residue_selector="neighbors_stored"/>
+      <Jumps jump_selector="interchain_jumps"/>
+    </MoveMapFactory>
+  </MOVE_MAP_FACTORIES>
+
+  <TASKOPERATIONS>
+    <OperateOnResidueSubset name="fix" selector="not_neighbor_stored">
+      <PreventRepackingRLT/>
+    </OperateOnResidueSubset>
+    <InitializeFromCommandline name="ifc"/>
+    <IncludeCurrent name="ic"/>
+    <RestrictToRepacking name="repack_only"/>
+    <ExtraRotamersGeneric name="ex12" ex1="1" ex2="1" extrachi_cutoff="0"/>
+  </TASKOPERATIONS>
+
+  <FILTERS>
+    <ScoreType name="sc" scorefxn="sfxn" threshold="9999"/>
+  </FILTERS>
+
+  <MOVERS>
+    <VirtualRoot name="vr"/>
+    <StoreResidueSubset name="store_neighbs" subset_name="neighbors" residue_selector="neighbors"/>
+    <StoreResidueSubset name="store_not_neighb" subset_name="not_neighbor" residue_selector="not_neighbor"/>
+    <StoreResidueSubset name="store_soft_sphere" subset_name="soft_sphere" residue_selector="soft_sphere"/>
+    <AddConstraintsToCurrentConformationMover name="cc"
+                          bound_width="0"
+                          CA_only="1"
+                          residue_selector="not_neighbor_stored"/>
+    <AddConstraintsToCurrentConformationMover name="cc2"
+                          coord_dev="2"
+                          bound_width="0"
+                          CA_only="1"
+                          residue_selector="soft_sphere_stored"/>
+    <MutateResidue name="mutate_A" residue_selector="res_A" new_res="%%target_aa%%" preserve_atom_coords="true"/>
+    <MutateResidue name="mutate_B" residue_selector="res_B" new_res="%%target_aa%%" preserve_atom_coords="true"/>
+    <MutateResidue name="mutate_C" residue_selector="res_C" new_res="%%target_aa%%" preserve_atom_coords="true"/>
+    <MutateResidue name="mutate_D" residue_selector="res_D" new_res="%%target_aa%%" preserve_atom_coords="true"/>
+    <FastRelax name="relax" scorefxn="sfxn_cc" repeats="3" disable_design="true"
+           task_operations="fix,ex12,ifc,repack_only,ic" movemap_factory="inside_sphere"
+           cartesian="true" bondangle="true"/>
+  </MOVERS>
+
+  <PROTOCOLS>
+    <Add mover="vr"/>
+    <Add mover="store_neighbs"/>
+    <Add mover="store_not_neighb"/>
+    <Add mover="store_soft_sphere"/>
+    <Add mover="mutate_A"/>
+    <Add mover="mutate_B"/>
+    <Add mover="mutate_C"/>
+    <Add mover="mutate_D"/>
+    <Add mover="cc"/>
+    <Add mover="cc2"/>
+    <Add mover="relax"/>
+  </PROTOCOLS>
+
+  <OUTPUT scorefxn="sfxn"/>
+</ROSETTASCRIPTS>
